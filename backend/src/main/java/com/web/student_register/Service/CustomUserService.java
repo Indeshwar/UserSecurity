@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserService implements UserDetailsService {
     private UserRepo userRepo;
-    private AuthenticationManager authenticationManager;
+    private DaoAuthenticationProvider daoAuthenticationProvider;
     private JWTTokenHelper jwtTokenHelper;
     private PasswordEncoder passwordEncoder;
     private RoleRePo roleRepo;
@@ -37,9 +38,9 @@ public class CustomUserService implements UserDetailsService {
 
     @Lazy
     @Autowired
-    public CustomUserService(UserRepo userRepo, AuthenticationManager authenticationManager, JWTTokenHelper jwtTokenHelper, PasswordEncoder passwordEncoder, RoleRePo roleRepo) {
+    public CustomUserService(UserRepo userRepo,DaoAuthenticationProvider daoAuthenticationProvider, JWTTokenHelper jwtTokenHelper, PasswordEncoder passwordEncoder, RoleRePo roleRepo) {
         this.userRepo = userRepo;
-        this.authenticationManager = authenticationManager;
+        this.daoAuthenticationProvider = daoAuthenticationProvider;
         this.jwtTokenHelper = jwtTokenHelper;
         this.passwordEncoder = passwordEncoder;
         this.roleRepo = roleRepo;
@@ -69,8 +70,7 @@ public class CustomUserService implements UserDetailsService {
 
     public LogInResponse userLogIn(UserDto userDto){
 
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(userDto.getUserName(), userDto.getPassword()));
+        Authentication authentication = daoAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(userDto.getUserName(), userDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token;
