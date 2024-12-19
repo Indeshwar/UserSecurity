@@ -39,23 +39,21 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtTokenHelper.getToken(request);
 
         if(token != null){
-            System.out.println("token -------> " + token);
             String userName = jwtTokenHelper.getUserNameFromToken(token);
-            System.out.println("name -------> " + userName);
             if(userName != null){
+                System.out.println("User name is " + userName);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
                 if(jwtTokenHelper.validateToken(token, userDetails)){
-                    System.out.println("token -------> validated");
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
                             null, userDetails.getAuthorities());
                     authentication.setDetails( new WebAuthenticationDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Request authenticated");
                 }
 
             }
         }
 
-        System.out.println("Filter chain: Pass the request and response to the next filter or the servlet");
         //Pass the request and response to the next filter or the servlet for processing the request
         filterChain.doFilter(request, response);
     }
