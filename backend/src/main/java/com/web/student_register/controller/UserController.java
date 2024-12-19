@@ -1,14 +1,15 @@
 package com.web.student_register.controller;
 
-import com.web.student_register.Dto.UserDto;
+import com.web.student_register.Dto.UserRequest;
+import com.web.student_register.Dto.UserResponse;
 import com.web.student_register.Service.CustomUserService;
-import com.web.student_register.entity.User;
-import com.web.student_register.response.LogInResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -29,15 +30,14 @@ public class UserController {
     }
     
     @PostMapping("/saveUser")
-    public ResponseEntity<User> registerUser(@RequestBody UserDto userDto){
-        User user = userService.registerUser(userDto);
-        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest request){
+        UserResponse response = userService.registerUser(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/user/logIn")
-    public ResponseEntity<LogInResponse> userLogIn(@RequestBody UserDto user){
-        System.out.print("User Name " + user.getUserName());
-        LogInResponse response = userService.userLogIn(user);
+    @PostMapping("/user/login")
+    public ResponseEntity<UserResponse> userLogIn(@RequestBody UserRequest request){
+        UserResponse response =  userService.userLogIn(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
