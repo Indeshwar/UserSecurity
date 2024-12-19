@@ -49,7 +49,7 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain generalFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
-                .antMatchers("/api/v1/hello", "/api/v1/user/logIn", "/api/v1/saveUser").permitAll()
+                .antMatchers("/api/v1/hello", "/api/v1/user/login", "/api/v1/saveUser").permitAll()
                 .antMatchers("/api/v1/student/**").hasAuthority("USER").anyRequest().authenticated()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)

@@ -1,0 +1,17 @@
+<Configuration>
+    <Appenders status="warn">
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"></PatternLayout>
+        </Console>
+        <File name="ErrorFile" fileName="logs/errorLog.log" append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss}, %p, Path=%X{Path}, IP=%X{IP}, User=%X{userName} %m%n"></PatternLayout>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
