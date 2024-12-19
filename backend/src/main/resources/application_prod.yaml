@@ -36,3 +36,19 @@ jwt:
     public-key: MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAn5IZ+2m9qFGtxqslyyfQ Hvk6U7czNZQIPB0BApXyE7tvJRTEYVH0KDtdJmUy8XsrUt3aclvFRZwPS0ov1dkW 3L7yRc/KKHgtXDg6rgJUgJMjAqdwruO/dGE1kg41x1AjgpOtnQ6a8m2J1WPrLFTv +FFsYW66rvy1aPw+mlUwXhVzwXh/Uz5+57aJEQjvzcv8BREil849nBQVR9mzpfWI xuoVw75w6Kgl+vK0S4vhpzJe/ejGvHAzcrN2UcDr9JVTjX1CECVT6R1n7tRe9cRG 961fv6ZjPBqNTBpKb5zzGP698p0ZMi766V1X91ggHfEHMlCuFfLg7r+NQEgnLDAA zTsFm93XiFTKkt5Y4fYt1obDOzjUoQheEBM5zf2d8SJ+99QsHkOwbuQctZbW12wI +XgE4ZVlEELfzkypW315H7Bcy0no1mP5B/UtEFA9TDDASWKluE87vEUcmN/r/2sZ ALXZRCuYXXq/UEeABHN6sszQ+gz0zTmBIyIXvMp3XUpIo8Uhd+UzbHz9Df3cNm0i Url0lu7CJYNbA9cRF4AJ0hA/+O4z3+sUjI09P8JUtaAqYAQTTlYXNExk+Y+kdW+z TJkftZ+kjRMH8qZWPVxB6VEDMf0XC8LLDpUwCa342/iJKHkMcVuUyAm7e9XVnhV7 Mn9PCU8d8q/rfYd5t5Q3U70CAwEAAQ==
     expires_in: 3600
 
+limiter:
+  domain: auth
+  discriptors:
+    - key: auth_api
+      Value: /api/v1/user/login
+      rate_limit:
+        unit: minute
+        time_frame: 5
+        requests_per_unit: 5
+
+    - key: auth_api
+      Value: /api/v1/student
+      rate_limit:
+        unit: minute
+        time_frame: 15
+        requests_per_unit: 10
