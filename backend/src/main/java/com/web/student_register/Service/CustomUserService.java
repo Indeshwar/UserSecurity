@@ -14,8 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -26,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -36,6 +36,7 @@ public class CustomUserService implements UserDetailsService {
     private JWTTokenHelper jwtTokenHelper;
     private PasswordEncoder passwordEncoder;
     private RoleRePo roleRepo;
+    private RedisService redisService;
     private static final int MAX_REQUEST = 3;
     // TIME_FRAME is 1 hour
     private static final long TIME_FRAME = 60 * 60 * 1000;
@@ -47,12 +48,14 @@ public class CustomUserService implements UserDetailsService {
 
     @Lazy
     @Autowired
-    public CustomUserService(UserRepo userRepo,DaoAuthenticationProvider daoAuthenticationProvider, JWTTokenHelper jwtTokenHelper, PasswordEncoder passwordEncoder, RoleRePo roleRepo) {
+    public CustomUserService(UserRepo userRepo,DaoAuthenticationProvider daoAuthenticationProvider, JWTTokenHelper jwtTokenHelper,
+                             PasswordEncoder passwordEncoder, RoleRePo roleRepo, RedisService redisService) {
         this.userRepo = userRepo;
         this.daoAuthenticationProvider = daoAuthenticationProvider;
         this.jwtTokenHelper = jwtTokenHelper;
         this.passwordEncoder = passwordEncoder;
         this.roleRepo = roleRepo;
+        this.redisService = redisService;
 
     }
 
@@ -62,10 +65,11 @@ public class CustomUserService implements UserDetailsService {
         User user = userRepo.getByUserName(username);
 
         if(user == null){
-            throw new UsernameNotFoundException(username + " does not exist!");
+            throw new UsernameNotFoundException("userName does not exist!");
         }
         return new UserPrincipal(user);
     }
+
 
     public UserResponse registerUser(UserRequest request) {
         //find the userName already exist or not
@@ -96,10 +100,14 @@ public class CustomUserService implements UserDetailsService {
         return response;
     }
 
+    public List<User> getUsers() {
+        List<User> users = userRepo.findAll();
+        return users;
+    }
+
     public UserResponse userLogIn(UserRequest request){
         String token = null;
         UserResponse response = new UserResponse();;
-        ResponseEntity<UserResponse> responseEntity = null;
         ThreadContext.put("userName", request.getUserName());
         try{
             Authentication authentication = daoAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword()));
@@ -107,8 +115,7 @@ public class CustomUserService implements UserDetailsService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             token = jwtTokenHelper.generateToken(userDetails.getUsername(), 0);
             response.setToken(token);
-            response.setMessage("Successfully log in");
-            responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
+            response.setMessage("Successfully login");
 
         }catch(Exception e){
             logger.error("Invalid credentials {}", e.getMessage());
@@ -185,4 +192,24 @@ public class CustomUserService implements UserDetailsService {
     }
 
 
+    public UserResponse getUserByName(String userName) {
+        UserResponse response = redisService.get(userName, UserResponse.class );
+        if(response != null){
+            return response;
+        }else{
+            User user =  userRepo.getByUserName(userName);
+            if(user==null){
+                throw new UserNotFoundException("User not found");
+            }
+            //cache the user in redis
+            redisService.set(userName, user, 100l);
+
+            UserResponse newResponse = new UserResponse();
+            newResponse.setUserName(user.getUserName());
+            newResponse.setPassword(user.getPassword());
+            return newResponse;
+
+        }
+
+    }
 }
