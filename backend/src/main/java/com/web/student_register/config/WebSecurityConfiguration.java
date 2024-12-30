@@ -50,7 +50,8 @@ public class WebSecurityConfiguration {
         http.csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/api/v1/hello", "/api/v1/user/login", "/api/v1/saveUser").permitAll()
-                .antMatchers("/api/v1/student/**").hasAuthority("USER").anyRequest().authenticated()
+                .antMatchers("/api/v1/student/**").hasAuthority("USER")
+                .antMatchers("/api/v1/admin").hasAuthority("ADMIN").anyRequest().authenticated()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
                 .and().addFilterBefore(rateLimitingFliter, BasicAuthenticationFilter.class)// Add rateLimitingFilter before processing authentication
