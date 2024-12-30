@@ -37,12 +37,12 @@ public class RateLimitingFliter extends OncePerRequestFilter {
 
         ThreadContext.put("IP", clientIp);
         ThreadContext.put("Path", path);
-        String token = jwtTokenHelper.getToken(request);
-        String userName = jwtTokenHelper.getUserNameFromToken(token);
+//        String token = jwtTokenHelper.getToken(request);
+//        String userName = jwtTokenHelper.getUserNameFromToken(token);
 
 
-        // Apply different rate limits based on user
-        Bucket bucket = buckets.computeIfAbsent(path + userName, key -> newBucket(path));
+        // Apply different rate limits based on IP
+        Bucket bucket = buckets.computeIfAbsent(path + clientIp, key -> newBucket(path));
         long availableTokens = bucket.getAvailableTokens();
 
         try{
